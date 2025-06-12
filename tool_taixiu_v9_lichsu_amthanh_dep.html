@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Tool Dự Đoán Tài Xỉu V9</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: linear-gradient(-45deg, #ff0000, #ff9900, #33cc33, #3399ff, #cc33ff);
+      background-size: 400% 400%;
+      animation: gradientBG 10s ease infinite;
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+      text-align: center;
+    }
+
+    @keyframes gradientBG {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    h1 {
+      font-size: 36px;
+      margin: 30px 0 10px;
+      background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: colorchange 5s infinite alternate;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 18px;
+      font-weight: bold;
+      background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: colorchange 5s infinite alternate;
+    }
+
+    @keyframes colorchange {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+
+    input[type="text"] {
+      padding: 14px;
+      font-size: 20px;
+      border-radius: 8px;
+      border: none;
+      width: 80%;
+      max-width: 500px;
+      outline: none;
+      box-shadow: 0 0 10px #00ffff;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-size: 22px;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
+      background-size: 1400% 1400%;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s ease;
+      animation: rainbow 6s ease infinite;
+      box-shadow: 0 0 15px #fff;
+    }
+
+    @keyframes rainbow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .result {
+      margin-top: 25px;
+      font-size: 32px;
+      font-weight: bold;
+      text-shadow: 0 0 10px #00ffcc;
+    }
+
+    .history {
+      margin-top: 30px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 18px;
+      background: rgba(0,0,0,0.3);
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: inset 0 0 10px #ffffff66;
+      width: 80%;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+    }
+
+    .history-entry {
+      margin-bottom: 8px;
+      border-bottom: 1px dashed #fff;
+      padding-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔮 Tool Dự Đoán Tài Xỉu V9</h1>
+  <p>Nhập đúng 10 kết quả gần nhất (cách nhau bằng dấu phẩy):</p>
+  <input type="text" id="input" placeholder="VD: 10,12,9,14,11,...">
+  <br>
+  <button onclick="predict()">Dự Đoán Ngay</button>
+  <div class="result" id="result"></div>
+  <div class="history" id="history"><strong>Lịch sử dự đoán:</strong><br></div>
+  <footer>✨ By Trần Quốc Trịnh ✨</footer>
+
+  <audio id="sound" src="https://www.myinstants.com/media/sounds/mixkit-game-click-1114.wav"></audio>
+
+  <script>
+    function predict() {
+      const input = document.getElementById('input').value;
+      const numbers = input.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+      const resultEl = document.getElementById('result');
+      const historyEl = document.getElementById('history');
+      const sound = document.getElementById('sound');
+      sound.play();
+
+      if (numbers.length !== 10) {
+        resultEl.innerText = "⚠️ Bạn phải nhập đúng 10 kết quả!";
+        return;
+      }
+
+      const tai = numbers.filter(n => n >= 11).length;
+      const xiu = 10 - tai;
+      const last = numbers[numbers.length - 1];
+
+      let prediction = "❌ Không xác định";
+
+      if (tai >= 7) {
+        prediction = "🧊 XỈU (gãy cầu Tài)";
+      } else if (xiu >= 7) {
+        prediction = "🔥 TÀI (gãy cầu Xỉu)";
+      } else {
+        let chainType = last >= 11 ? "tai" : "xiu";
+        let chainCount = 1;
+        for (let i = numbers.length - 2; i >= 0; i--) {
+          if ((chainType === "tai" && numbers[i] >= 11) || (chainType === "xiu" && numbers[i] < 11)) {
+            chainCount++;
+          } else {
+            break;
+          }
+        }
+
+        if (chainCount >= 3) {
+          prediction = chainType === "tai" ? "🌀 XỈU (đảo cầu)" : "☀️ TÀI (đảo cầu)";
+        } else {
+          prediction = last >= 11 ? "🧊 XỈU (theo nhịp)" : "☀️ TÀI (theo nhịp)";
+        }
+      }
+
+      const time = new Date().toLocaleTimeString();
+      resultEl.innerText = "🔮 Dự đoán: " + prediction;
+      historyEl.innerHTML += `<div class="history-entry">[${time}] ${input} 👉 <strong>${prediction}</strong></div>`;
+    }
+  </script>
+</body>
+</html>
